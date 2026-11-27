@@ -1,0 +1,47 @@
+{
+  "scan_time": "2026-11-27 04:25:55",
+  "summary": {
+    "total": 4,
+    "open": 3,
+    "closed": 1
+  },
+  "results": [
+    {
+      "target": "127.0.0.1",
+      "port": 18080,
+      "state": "OPEN",
+      "note": "connection accepted",
+      "banner": null,
+      "http": {
+        "status_code": 200,
+        "content_type": "text/plain",
+        "server": "BaseHTTP/0.6 Python/3.13.14",
+        "body_preview": "COMP H2702 local HTTP test service"
+      }
+    },
+    {
+      "target": "127.0.0.1",
+      "port": 19090,
+      "state": "OPEN",
+      "note": "connection accepted",
+      "banner": "COMP H2702 Banner Service v1.0",
+      "http": null
+    },
+    {
+      "target": "127.0.0.1",
+      "port": 20001,
+      "state": "OPEN",
+      "note": "connection accepted",
+      "banner": "COMP H2702 Generic TCP Service",
+      "http": null
+    },
+    {
+      "target": "127.0.0.1",
+      "port": 20002,
+      "state": "CLOSED",
+      "note": "timed out",
+      "banner": null,
+      "http": null
+    }
+  ]
+}
