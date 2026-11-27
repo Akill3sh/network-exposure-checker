@@ -1,0 +1,5 @@
+target,port,state,note,banner,http_status,content_type
+127.0.0.1,18080,OPEN,connection accepted,,200,text/plain
+127.0.0.1,19090,OPEN,connection accepted,COMP H2702 Banner Service v1.0,,
+127.0.0.1,20001,OPEN,connection accepted,COMP H2702 Generic TCP Service,,
+127.0.0.1,20002,CLOSED,timed out,,,
