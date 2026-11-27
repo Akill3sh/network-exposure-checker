@@ -13,7 +13,7 @@ The script only checks 127.0.0.1 and the ports in `ports.txt`. If a target is no
 - `port_checker.py`: my script.
 - `local_test_services.py`: starts the safe test services. The lecturer supplied it.
 - `targets.txt` and `ports.txt`: the target (127.0.0.1) and the four ports. Also supplied.
-- `output/`: made when the script runs. It holds `report.txt`, `results.csv` and `results.json`.
+- `output/`: made when the script runs. It holds `report.txt`, `results.csv` and `results.json`. A sample from one of my runs is in this repo.
 
 ## What you need
 
@@ -42,7 +42,7 @@ With the test services running, I get this:
 | 18080 | OPEN | HTTP 200, Content-Type text/plain |
 | 19090 | OPEN | Banner: COMP H2702 Banner Service v1.0 |
 | 20001 | OPEN | Banner: COMP H2702 Generic TCP Service |
-| 20002 | CLOSED | Connection refused |
+| 20002 | CLOSED | Nothing listening. On my Windows PC it shows "timed out", on other systems "connection refused" |
 
 ## How it works
 
