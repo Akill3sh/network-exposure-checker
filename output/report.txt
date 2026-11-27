@@ -1,0 +1,23 @@
+COMP H2702 - Local Network Exposure Report
+Scan time: 2026-11-27 04:25:55
+Timeout per port: 1.0s
+
+Ports checked: 4   OPEN: 3   CLOSED: 1
+
+Findings
+--------
+127.0.0.1:18080  OPEN  (connection accepted)
+    HTTP 200  Content-Type: text/plain
+    Exposure: Web service answering. Check what it serves and who can reach it.
+127.0.0.1:19090  OPEN  (connection accepted)
+    Banner: COMP H2702 Banner Service v1.0
+    Exposure: Service reveals a banner (name/version). This helps an attacker fingerprint it.
+127.0.0.1:20001  OPEN  (connection accepted)
+    Banner: COMP H2702 Generic TCP Service
+    Exposure: Service reveals a banner (name/version). This helps an attacker fingerprint it.
+127.0.0.1:20002  CLOSED  (timed out)
+    Exposure: Nothing listening. No exposure on this port.
+
+Note: an open port only means a program is listening. It is not a
+vulnerability by itself. Risk depends on what the service is, its
+version, its config, and who can reach it.
