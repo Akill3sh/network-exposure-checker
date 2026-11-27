@@ -1,3 +1,5 @@
+# COMP H2702 scenario D: checks which ports are open on localhost only,
+# then saves a report. Standard library only.
 import csv
 import ipaddress
 import json
@@ -5,20 +7,26 @@ import socket
 from datetime import datetime
 from pathlib import Path
 
+# Input and output locations, relative to this script
 BASE_DIR = Path(__file__).parent
 TARGETS_FILE = BASE_DIR / "targets.txt"
 PORTS_FILE = BASE_DIR / "ports.txt"
 OUTPUT_DIR = BASE_DIR / "output"
 
+# Settings: seconds to wait per connection, max banner bytes to read,
+# which ports get an HTTP request and which get a banner read
 TIMEOUT = 1.0
 BANNER_BYTES = 1024
 HTTP_PORTS = {18080}
 BANNER_PORTS = {19090, 20001}
 
+# The only targets the script will touch
 APPROVED_TARGETS = {"127.0.0.1"}
 
 
 def load_lines(path):
+    # Read a text file, skipping blank lines and lines starting with #.
+    # A missing file gives an error message and an empty list, not a crash.
     try:
         with open(path, "r", encoding="utf-8") as f:
             return [line.strip() for line in f
@@ -29,6 +37,8 @@ def load_lines(path):
 
 
 def is_allowed_target(target):
+    # Safety check: the target must be a real IP, a loopback address and on
+    # the approved list. Returns (True/False, reason).
     try:
         ip = ipaddress.ip_address(target)
     except ValueError:
@@ -41,6 +51,7 @@ def is_allowed_target(target):
 
 
 def load_targets(path):
+    # Keep only the targets that pass the safety check, and say why any are blocked
     targets = []
     for t in load_lines(path):
         ok, reason = is_allowed_target(t)
@@ -52,6 +63,7 @@ def load_targets(path):
 
 
 def load_ports(path):
+    # Keep only valid port numbers (1 to 65535), skipping anything else
     ports = []
     for line in load_lines(path):
         try:
@@ -67,6 +79,9 @@ def load_ports(path):
 
 
 def check_port(target, port):
+    # Try a TCP connection. If it connects the port is OPEN, otherwise it is
+    # CLOSED and the reason is returned (refused, timed out or another error).
+    # Windows shows a closed port as "timed out" instead of "refused".
     try:
         with socket.create_connection((target, port), timeout=TIMEOUT):
             return "OPEN", "connection accepted"
@@ -79,6 +94,7 @@ def check_port(target, port):
 
 
 def grab_banner(target, port):
+    # Connect and read the first message the service sends, if it sends one
     try:
         with socket.create_connection((target, port), timeout=TIMEOUT) as s:
             data = s.recv(BANNER_BYTES)
@@ -88,6 +104,7 @@ def grab_banner(target, port):
 
 
 def http_get(target, port):
+    # Send a plain HTTP GET over a socket and read the whole reply
     request = (f"GET / HTTP/1.1\r\nHost: {target}:{port}\r\n"
                f"Connection: close\r\n\r\n").encode()
     try:
@@ -102,6 +119,8 @@ def http_get(target, port):
     except OSError as e:
         return {"error": str(e)}
 
+    # Split the reply into headers and body, then pull out the status code and
+    # the headers we care about
     head, _, body = response.partition(b"\r\n\r\n")
     lines = head.decode("iso-8859-1").split("\r\n")
     status_parts = lines[0].split(" ", 2) if lines else []
@@ -119,6 +138,8 @@ def http_get(target, port):
 
 
 def scan(targets, ports):
+    # Check every port on every target. Open ports also get a banner read or
+    # an HTTP request, depending on the settings at the top.
     results = []
     for target in targets:
         for port in ports:
@@ -135,6 +156,7 @@ def scan(targets, ports):
 
 
 def interpret(row):
+    # Short plain explanation of what each result means for exposure
     if row["state"] == "CLOSED":
         return "Nothing listening. No exposure on this port."
     if row["http"] and "status_code" in row["http"]:
@@ -147,12 +169,14 @@ def interpret(row):
 
 
 def summarise(results):
+    # Count how many ports are open and closed
     open_count = sum(1 for r in results if r["state"] == "OPEN")
     return {"total": len(results), "open": open_count,
             "closed": len(results) - open_count}
 
 
 def save_reports(results, summary):
+    # Write the same results three ways: JSON, CSV and a readable text report
     OUTPUT_DIR.mkdir(exist_ok=True)
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -171,6 +195,7 @@ def save_reports(results, summary):
                         r["banner"] or "", h.get("status_code", ""),
                         h.get("content_type", "")])
 
+    # Build the text report line by line
     lines = [
         "COMP H2702 - Local Network Exposure Report",
         f"Scan time: {stamp}",
@@ -207,6 +232,7 @@ def save_reports(results, summary):
 
 
 def main():
+    # Load the input, scan, print a summary and save the reports
     print("COMP H2702 - Local Network Exposure Checker\n")
     targets = load_targets(TARGETS_FILE)
     ports = load_ports(PORTS_FILE)
